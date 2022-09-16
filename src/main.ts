@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import { Client } from 'discord.js'
+import { Client, VoiceBasedChannel } from 'discord.js'
 import prism from 'prism-media'
 import {
   NoSubscriberBehavior,
@@ -13,6 +13,9 @@ import {
 } from '@discordjs/voice'
 import { createServer } from 'net'
 import { PassThrough } from 'stream'
+import Fastify from 'fastify'
+
+const fastify = Fastify({ logger: true })
 
 const player = createAudioPlayer({
   behaviors: {
@@ -81,6 +84,8 @@ const client = new Client({
   intents: ['Guilds', 'GuildMessages', 'GuildVoiceStates', 'MessageContent'],
 })
 
+let _channel: VoiceBasedChannel | undefined
+
 client.on('ready', async () => {
   console.log('discord.js client is ready!')
   const guild = client.guilds.cache.get(process.env.DISCORD_GUILD_ID!)!
@@ -89,9 +94,20 @@ client.on('ready', async () => {
     console.error('Channel is not voice based')
     return
   }
+  _channel = channel
   const connection = await connectToChannel(channel)
   connection.subscribe(player)
   attachRecorder()
 })
 
 client.login(process.env.DISCORD_TOKEN)
+
+if (process.env.PORT) {
+  fastify.get('/count', async () => {
+    return {
+      count: _channel?.members.size,
+      listening: _channel?.members.filter((m) => !m.voice.deaf).size,
+    }
+  })
+  fastify.listen({ port: +process.env.PORT })
+}
