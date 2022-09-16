@@ -81,7 +81,7 @@ async function connectToChannel(channel) {
 }
 
 const client = new Client({
-  intents: ['Guilds', 'GuildMessages', 'GuildVoiceStates', 'MessageContent'],
+  intents: ['Guilds', 'GuildVoiceStates'],
 })
 
 let _channel: VoiceBasedChannel | undefined
