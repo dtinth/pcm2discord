@@ -27,13 +27,15 @@ const encoder = new prism.opus.Encoder({
   frameSize: 960,
   channels: 2,
   rate: 48000,
+  application: 'AUDIO',
 })
+encoder.setBitrate(128000)
 
 const server = createServer((socket) => {
   socket.on('data', (x) => {
     encoder.write(x)
   })
-}).listen(22222, () => {
+}).listen(+process.env.PORT || 28282, () => {
   console.log('Listening on port ' + (server.address() as any).port)
 })
 
@@ -102,12 +104,12 @@ client.on('ready', async () => {
 
 client.login(process.env.DISCORD_TOKEN)
 
-if (process.env.PORT) {
+if (process.env.HTTP_PORT) {
   fastify.get('/count', async () => {
     return {
       count: _channel?.members.size,
       listening: _channel?.members.filter((m) => !m.voice.deaf).size,
     }
   })
-  fastify.listen({ port: +process.env.PORT })
+  fastify.listen({ port: +process.env.HTTP_PORT, host: '0.0.0.0' })
 }
