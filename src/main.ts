@@ -123,6 +123,9 @@ client.on('messageCreate', (message) => {
     message: message.content,
     timestamp: message.createdAt.toISOString(),
   })
+  while (_chatHistory.length > 100) {
+    _chatHistory.shift()
+  }
 })
 
 client.login(process.env.DISCORD_TOKEN)
