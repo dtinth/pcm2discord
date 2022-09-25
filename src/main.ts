@@ -83,7 +83,13 @@ async function connectToChannel(channel) {
 }
 
 const client = new Client({
-  intents: ['Guilds', 'GuildVoiceStates', 'MessageContent', 'GuildMembers'],
+  intents: [
+    'Guilds',
+    'GuildVoiceStates',
+    'MessageContent',
+    'GuildMembers',
+    'GuildMessages',
+  ],
 })
 
 interface ChatHistoryEntry {
