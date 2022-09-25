@@ -83,10 +83,18 @@ async function connectToChannel(channel) {
 }
 
 const client = new Client({
-  intents: ['Guilds', 'GuildVoiceStates'],
+  intents: ['Guilds', 'GuildVoiceStates', 'MessageContent', 'GuildMembers'],
 })
 
+interface ChatHistoryEntry {
+  id: string
+  from: string
+  message: string
+  timestamp: string
+}
+
 let _channel: VoiceBasedChannel | undefined
+let _chatHistory: ChatHistoryEntry[] = []
 
 client.on('ready', async () => {
   console.log('discord.js client is ready!')
@@ -102,6 +110,18 @@ client.on('ready', async () => {
   attachRecorder()
 })
 
+client.on('messageCreate', (message) => {
+  if (message.channel.id !== process.env.DISCORD_CHANNEL_ID) {
+    return
+  }
+  _chatHistory.push({
+    id: message.id,
+    from: message.member?.displayName || message.author.username,
+    message: message.content,
+    timestamp: message.createdAt.toISOString(),
+  })
+})
+
 client.login(process.env.DISCORD_TOKEN)
 
 if (process.env.HTTP_PORT) {
@@ -110,6 +130,9 @@ if (process.env.HTTP_PORT) {
       count: _channel?.members.size,
       listening: _channel?.members.filter((m) => !m.voice.deaf).size,
     }
+  })
+  fastify.get('/chat', async () => {
+    return _chatHistory
   })
   fastify.listen({ port: +process.env.HTTP_PORT, host: '0.0.0.0' })
 }
