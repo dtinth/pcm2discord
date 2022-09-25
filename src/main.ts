@@ -114,6 +114,9 @@ client.on('messageCreate', (message) => {
   if (message.channel.id !== process.env.DISCORD_CHANNEL_ID) {
     return
   }
+  if (message.author.bot) {
+    return
+  }
   _chatHistory.push({
     id: message.id,
     from: message.member?.displayName || message.author.username,
