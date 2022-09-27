@@ -126,7 +126,11 @@ client.on('messageCreate', (message) => {
   _chatHistory.push({
     id: message.id,
     from: message.member?.displayName || message.author.username,
-    message: message.content,
+    message:
+      message.content +
+      Array.from(message.attachments.values())
+        .map((x) => '\n' + x.url)
+        .join(''),
     timestamp: message.createdAt.toISOString(),
   })
   while (_chatHistory.length > 100) {
